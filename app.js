@@ -1,7 +1,9 @@
 const express = require("express");
 const app = express();
 const bodyParser = require('body-parser');
+const dbConnect = require('./db/dbConnect');
 
+dbConnect();
 // body parser configuration
 app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
