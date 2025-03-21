@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 const bodyParser = require('body-parser');
 const dbConnect = require('./db/dbConnect');
+const bcrypt = require('bcrypt');
+const User = require('./db/UserModel');
 
 dbConnect();
 // body parser configuration
@@ -13,5 +15,28 @@ app.get("/", (request, response, next) => {
   next();
 });
 
+app.post('/register', async(request, response) => {
+  console.log('request.body: ', request.body.password);
+  console.log('request.body: ', typeof request.body.password);
+  console.log('hashed ', await bcrypt.hash(request.body.password, 10));
+  await bcrypt.hash(request.body.password, 10)
+  .then((hashedPassword) => {
+    const user = new User({
+      email: request.body.email,
+      password: hashedPassword
+    })
+
+    user.save()
+    .then((result) => {
+      response.status(201).send({ message: 'User created', result });
+    })
+    .catch((error) => {
+      response.status(500).send({ message: 'Error creating user', error });
+    })
+  })
+  .catch((error) => {
+    response.status(500).send({ message: 'Error hashing password', error });
+  });
+});
 
 module.exports = app;
