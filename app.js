@@ -5,8 +5,16 @@ const dbConnect = require('./db/dbConnect');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('./db/UserModel');
+const auth = require('./auth');
 
 dbConnect();
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
+  next();
+})
+
 // body parser configuration
 app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
@@ -72,6 +80,14 @@ app.post('/register', async(request, response) => {
   .catch((error) => {
     response.status(500).send({ message: 'Error hashing password', error });
   });
+});
+
+app.get('/public', (request, response) => {
+  response.status(200).send({ message: 'This is a public endpoint' });
+});
+
+app.get('/protected', auth, (request, response) => {
+  response.status(200).send({ message: 'This is a protected endpoint' });
 });
 
 module.exports = app;
